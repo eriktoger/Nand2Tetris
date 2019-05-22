@@ -1,0 +1,52 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/DMux4Way.hdl
+
+/**
+ * 4-way demultiplexor:
+ * {a, b, c, d} = {in, 0, 0, 0} if sel == 00
+ *                {0, in, 0, 0} if sel == 01
+ *                {0, 0, in, 0} if sel == 10
+ *                {0, 0, 0, in} if sel == 11
+ */
+
+CHIP DMux4Way {
+    IN in, sel[2];
+    OUT a, b, c, d;
+
+    PARTS:
+    // Put your code here:
+    //DMux(in=in,sel=sel[0],a=a1,b=b1); // in,0 eller 0,in
+  
+    // nu kommer vi 0 0 - - eller - - 00 
+    //Not(in=in,out=notin);
+    //And(a=in,b=notin,out=false);
+
+    Not(in=sel[0],out=notsel0);
+    Not(in=sel[1],out=notsel1);
+
+  
+    And(a=notsel0,b=notsel1,out=asel); // 1 iff sel==00
+    And(a=in,b=asel,out=a); // a==1 om in==1 och sel==00
+
+    And(a=sel[0],b=notsel1,out=bsel); // 1 iff sel==01
+    And(a=in,b=bsel,out=b); //b==1 om in==1 och sel==01
+
+    And(a=sel[1],b=notsel0,out=csel); // 1 iff sel==10
+    And(a=in,b=csel,out=c); //c==1 om in==1 och sel==01
+
+    And(a=sel[1],b=sel[0],out=dsel); // 1 iff sel==10
+    And(a=in,b=dsel,out=d); //d==1 om in==1 och sel==11
+    
+ 
+    //Mux(a=a1,b=false,sel=sel[1],out=a); // a=1 om sel=00 och in=1
+    //Mux(a=a1,b=false,sel=sel[1],out=a);
+
+
+    //DMux(in=in,sel=sel[0],a=c1,b=d1); // (0,0) in,0 eller (0,0) 0,in
+
+    
+
+
+}

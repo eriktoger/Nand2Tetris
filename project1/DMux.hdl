@@ -1,0 +1,36 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/DMux.hdl
+
+/**
+ * Demultiplexor:
+ * {a, b} = {in, 0} if sel == 0
+ *          {0, in} if sel == 1
+ */
+
+CHIP DMux {
+    IN in, sel;
+    OUT a, b;
+
+    PARTS:
+    // Put your code here:
+    //Mux(a=in,b=0,sel=sel, out=muxAin); // är 1 om a=1,sel=0
+    //Mux(a=0,b=in,sel=sel, out=muxBin);// är 1 om b=1,sel=1
+    //Mux(a=muxAin,b=muxBin,sel=sel,out=temp); // nu väljs rätt temp=1
+    
+    Not(in=sel,out=notsel);
+    And(a=in,b=notsel,out=inAndnotsel);// blir 1 om in=1, sel=0, 
+    And(a=in,b=sel,out=inAndsel); // blir 1 om in=1,sel=1    
+
+
+    Or(a=sel,b=notsel,out=true);
+	
+    // vet inte annars hur jag ska få ut dem		
+    And(a=inAndnotsel,b=true,out=a);
+    And(a=inAndsel,b=true,out=b);    
+
+    //{inAndnotsel,inAndsel}=out;
+
+
+}

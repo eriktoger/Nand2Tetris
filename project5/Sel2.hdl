@@ -1,0 +1,16 @@
+//egen 
+
+/**
+ * limmar ihop två tal 1+0 = 10
+ 
+ */
+
+CHIP Sel2 {
+    IN a, b;
+    OUT out[2];
+
+    PARTS:
+   // Put you code here:
+	And(a=a,b=true,out=out[1]); // ettan är först
+	And(a=b,b=true,out=out[0]); // nollan är längst bak
+}

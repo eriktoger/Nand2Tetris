@@ -1,0 +1,180 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/05/CPU.hdl
+
+/**
+ * The Hack CPU (Central Processing unit), consisting of an ALU,
+ * two registers named A and D, and a program counter named PC.
+ * The CPU is designed to fetch and execute instructions written in 
+ * the Hack machine language. In particular, functions as follows:
+ * Executes the inputted instruction according to the Hack machine 
+ * language specification. The D and A in the language specification
+ * refer to CPU-resident registers, while M refers to the external
+ * memory location addressed by A, i.e. to Memory[A]. The inM input 
+ * holds the value of this location. If the current instruction needs 
+ * to write a value to M, the value is placed in outM, the address 
+ * of the target location is placed in the addressM output, and the 
+ * writeM control bit is asserted. (When writeM==0, any value may 
+ * appear in outM). The outM and writeM outputs are combinational: 
+ * they are affected instantaneously by the execution of the current 
+ * instruction. The addressM and pc outputs are clocked: although they 
+ * are affected by the execution of the current instruction, they commit 
+ * to their new values only in the next time step. If reset==1 then the 
+ * CPU jumps to address 0 (i.e. pc is set to 0 in next time step) rather 
+ * than to the address resulting from executing the current instruction. 
+ */
+
+CHIP CPU {
+
+    IN  inM[16],         // M value input  (M = contents of RAM[A])
+        instruction[16], // Instruction for execution
+        reset;           // Signals whether to re-start the current
+                         // program (reset==1) or continue executing
+                         // the current program (reset==0).
+
+    OUT outM[16],        // M value output
+        writeM,          // Write to M? 
+        addressM[15],    // Address in data memory (of M)
+        pc[15];          // address of next instruction
+
+    PARTS:
+    // Put your code here:
+
+
+	// jag hade ett skumt fel, jag fick inte CPUKopia heller att funkar (tagen från nätet)
+	// har för mig att writeM var 1, men nu är den inte det längre
+
+
+	
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// C and notC
+	And(a=instruction[15],b=true,out=C);
+	Not(in=C,out=notC);
+	
+	// instructions	innan var alla c true, men är det ingen c så är det bara en plats.
+	// bytte tillbaka för visst är c==0 så är det ingen instruktion, men c1,d,j används i massa beräkningar.
+
+	And(a=instruction[12],b=true,out=a);
+	
+	And(a=instruction[11],b=true,out=c1);
+	And(a=instruction[10],b=true,out=c2);
+	And(a=instruction[9],b=true,out=c3);
+	And(a=instruction[8],b=true,out=c4);
+	And(a=instruction[7],b=true,out=c5);
+	And(a=instruction[6],b=true,out=c6);
+	
+	And(a=instruction[5],b=true,out=d1); //sparas i a
+	And(a=instruction[4],b=true,out=d2); //sparas i d
+	And(a=instruction[3],b=true,out=d3); //sparas i m
+
+	And(a=instruction[2],b=true,out=j1);
+	And(a=instruction[1],b=true,out=j2);
+	And(a=instruction[0],b=true,out=j3);
+
+	Not(in=j1,out=notj1);
+	Not(in=j2,out=notj2);
+	Not(in=j3,out=notj3);
+	
+	Not(in=ngout,out=notngout);
+	Not(in=zrout,out=notzrout);
+
+	Or(a=zrout,b=ngout,out=zeroneg);
+	Not(in=zeroneg,out=positive);
+	Or(a=positive,b=zrout,out=zeropos);
+
+	//no jump
+	And(a=notj1,b=notj2,out=notj1j2);
+	And(a=notj3,b=notj1j2,out=null); // null==1 betyder inget hopp
+	
+	// JGT
+	
+	And(a=j3,b=notj1j2,out=JGTa);//
+	And(a=notj1,b=positive,out=JGTb); 
+	And(a=JGTa,b=JGTb,out=JGT);// JGT==1 betyder jump (out>0)
+
+	// JEQ
+	And(a=notj1,b=j2,out=JEQa);
+	And(a=notj3,b=zrout,out=JEQb);
+	And(a=JEQa,b=JEQb,out=JEQ);
+
+	//JGE		
+	
+	And(a=notj1,b=j2,out=JGEa);
+	And(a=j3,b=zeropos,out=JGEb);
+	And(a=JGEa,b=JGEb,out=JGE);
+	
+	// JLT
+	And(a=j1,b=notj2,out=JLTa);
+	And(a=notj3,b=ngout,out=JLTb);
+	And(a=JLTa,b=JLTb,out=JLT); // JLT==1 och <0
+	// JNE
+	And(a=j1,b=notj2,out=JNEa);
+	And(a=j3,b=notzrout,out=JNEb);
+	And(a=JNEa,b=JNEb,out=JNE);
+
+	// JLE
+	And(a=j1,b=j2,out=JLEa);
+	And(a=notj3,b=zeroneg,out=JLEb);
+	And(a=JLEa,b=JLEb,out=JLE);
+
+	// JMP
+	And(a=j1,b=j2,out=JMPa);
+	And(a=j3,b=JMPa,out=JMP);
+	
+	// 8 way or har in[] som argument
+	//0r8Way(a=false,b=JGT,c=JEQ,d=JGE,e=JLT,f=JNE,g=JLE,h=JMP,out=jump);// if jump==1 then jump
+	//ändrade a=null till a=false
+
+	// round 1 quarter
+  	Or(a=false,b=JGT,out=quart1);
+    	Or(a=JEQ,b=JGE,out=quart2);
+    	Or(a=JLT,b=JNE,out=quart3);
+    	Or(a=JLE,b=JMP,out=quart4);
+	  
+	 //round 2 semi
+	Or(a=quart1,b=quart2,out=semi1);
+    	Or(a=quart3,b=quart4,out=semi2);
+
+	// round 3 final
+    	Or(a=semi1,b=semi2,out=jumpa);
+	And(a=jumpa,b=C,out=jump); // endast om det är en instruktion som vi ska följa den
+	Not(in=jump,out=notjump);
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// Mux nr1
+	Mux16(a=instruction, b=aluout, sel=C,out=mux1out); // a-instruction är c==0 och då väljs den. annars kan aluout vara på väg på areg
+	
+	// AREG
+	Or(a=notC,b=d1,out=loadareg); // antingen är det en Ains eller så ska vi lägga aluout i Areg
+		
+
+	ARegister(in=mux1out,load=loadareg,out=aregout);
+	And16(a=aregout,b=true,out[0..14]=addressM);
+
+	// writeM
+	And(a=d3,b=C,out=writeM); //ändrade från true till C
+	
+	// PC
+	PC(in=aregout,reset=reset,load=jump,inc=notjump,out[0..14]=pc); //0-14 eller 1-15?? bytte från notjump till true för inc men spelar ingen roll
+
+	//Muxnr2c jag tror C är rätt : innan trodde jag sel=c är säkert fel se a=0 a=1
+	And(a=a,b=C,out=selmux2); // är det c eller om a==1 så ska M väljas: innan var det Or
+	Mux16(a=aregout, b=inM, sel=selmux2,out=Mux2out); // om instruction är c=1 så körs inM
+
+	//alu Jag har int dubbelkollat zx,nx att de är 
+	ALU(x=dregout,y=Mux2out,zx=c1,nx=c2,zy=c3,ny=c4,f=c5,no=c6,zr=zrout,ng=ngout,out=aluout);
+	// ser ut som att D här ihop med x
+
+	//Dreg
+	And(a=d2,b=C,out=dload);
+	DRegister(in=aluout,load=dload,out=dregout); //vad ska load/c vara här? något med zrout ngout???
+	
+	//outM
+	And16(a=aluout,b=true,out=outM);
+	
+	
+}  

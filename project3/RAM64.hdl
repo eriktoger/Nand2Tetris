@@ -1,0 +1,35 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/03/a/RAM64.hdl
+
+/**
+ * Memory of 64 registers, each 16 bit-wide. Out holds the value
+ * stored at the memory location specified by address. If load==1, then 
+ * the in value is loaded into the memory location specified by address 
+ * (the loaded value will be emitted to out from the next time step onward).
+ */
+
+CHIP RAM64 {
+    IN in[16], load, address[6];
+    OUT out[16];
+
+    PARTS:
+    // Put your code here:
+    //address[0..2] berättar vilken ram vi har och address[3..5] vilken del av ram8.
+    DMux8Way(in=load,sel=address[0..2], a=dmux0,b=dmux1,c=dmux2,d=dmux3,e=dmux4,f=dmux5,g=dmux6,h=dmux7);
+
+    RAM8(in=in,load=dmux0,address=address[3..5],out=ram8out0);
+    RAM8(in=in,load=dmux1,address=address[3..5],out=ram8out1);
+    RAM8(in=in,load=dmux2,address=address[3..5],out=ram8out2);
+    RAM8(in=in,load=dmux3,address=address[3..5],out=ram8out3);
+    RAM8(in=in,load=dmux4,address=address[3..5],out=ram8out4);
+    RAM8(in=in,load=dmux5,address=address[3..5],out=ram8out5);
+    RAM8(in=in,load=dmux6,address=address[3..5],out=ram8out6);
+    RAM8(in=in,load=dmux7,address=address[3..5],out=ram8out7);
+    
+    // out är med hjälp av MUx8Wayy
+    // Samma selector som i DMux8way. samt att jag hade nog kunnat byta plats på [0..2] och [3..5]
+    Mux8Way16(a=ram8out0,b=ram8out1,c=ram8out2,d=ram8out3,e=ram8out4,f=ram8out5,g=ram8out6,h=ram8out7,sel=address[0..2],out=out);
+
+}
