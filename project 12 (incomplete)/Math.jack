@@ -1,0 +1,187 @@
+class Math {
+    
+    static Array twoToThe;
+    
+    function void init(){
+        let twoToThe = Array.new(16);
+        let twoToThe[0] = 1;
+        let twoToThe[1] = 2;
+        let twoToThe[2] = 4;
+        let twoToThe[3] = 8;
+        let twoToThe[4] = 16;
+        let twoToThe[5] = 32;
+        let twoToThe[6] = 64;
+        let twoToThe[7] = 128;
+        let twoToThe[8] = 256;
+        let twoToThe[9] = 512;
+        let twoToThe[10] = 1024;
+        let twoToThe[11] = 2048;
+        let twoToThe[12] = 4096;
+        let twoToThe[13] = 8192;
+        let twoToThe[14] = 16384;
+        // cant hold 32768
+        let twoToThe[15] = 32767 + 1;
+        return;
+    }
+    
+    function int abs(int x){
+        
+        if(x < 0){
+            return -x;
+        }
+        
+        return x;
+    }
+    
+    function int multiply (int x, int y){
+        
+        var int sum;
+        var int shiftedX;
+        var int nrOfInts;
+        var bool positive;
+        // we have a 16-bit system 0-15
+        let nrOfInts = 16;
+        let sum = 0;
+        let shiftedX = Math.abs(x);
+        
+        // correct sign
+        if ( (x > 0) & (y > 0 ) ) {
+            let positive = true;
+        }
+        
+        if ( (x < 0) & (y < 0 ) ) {
+            let positive = true;
+        }
+        
+        if ( (x < 0) & (y > 0 ) ) {
+            let positive = false;
+        }
+        
+        if ( (x > 0) & (y < 0 ) ) {
+            let positive = false;
+        }
+        
+        if(x = 0){
+            return 0;
+        }
+        if( y = 0){
+            return 0;
+        }
+       
+        
+        let x = Math.abs(x);
+        let y = Math.abs(y);
+           
+        while( nrOfInts > 0 ) {
+            
+          if( Math.bit(y,16 - nrOfInts ) ) {
+            let sum = sum + shiftedX; 
+          }
+          let shiftedX = shiftedX + shiftedX;
+          let nrOfInts = nrOfInts -1;
+        }
+        
+        if(positive = true){
+            return sum;
+        }
+          return -sum;
+        
+    }
+    
+     function int divide(int x, int y){
+         // dividex with y
+         // i dont take care of overflow , because i dont understand how
+         var int q;
+         var bool positive;
+        if ( (x > 0) & (y > 0 ) ) {
+            let positive = true;
+        }
+        
+        if ( (x < 0) & (y < 0 ) ) {
+            let positive = true;
+        }
+        
+        if ( (x < 0) & (y > 0 ) ) {
+            let positive = false;
+        }
+        
+        if ( (x > 0) & (y < 0 ) ) {
+            let positive = false;
+        }
+        
+        let x = Math.abs(x);
+        let y = Math.abs(y);
+         
+         if( (y>x) | (y < 0) ){
+             return 0;
+         }
+         
+         
+         let q = Math.divide(x,2*y);
+         
+         if(  (x-(2*q*y) ) < y ){
+             
+          if(positive){
+            return 2*q;
+           }
+          return -2*q;
+             
+          }
+         else{
+              if(positive){
+            return 2*q+1;
+           }
+          return -2*q -1;
+         }
+     }
+    
+    function int min(int x, int y){
+        if(x < y){
+            return x;
+        }
+        
+        return y ;
+     }
+    
+    function int max(int x, int y){
+        
+        if(x > y){
+            return x;
+        }
+        
+        return y ;
+        
+      }
+    
+    function int sqrt(int x){
+        
+        var int y;
+        var int nrOfInts;
+        var int squared;
+        let y = 0;
+        // half of 16 -1
+        let nrOfInts = 7;
+        while( nrOfInts > -1  ){
+            let squared = Math.multiply( y + twoToThe[nrOfInts] , y + twoToThe[nrOfInts] ); 
+            if( ( ~((squared ) > x ) ) & (squared > 0) ){
+              let y = y + twoToThe[nrOfInts];
+            }
+            let nrOfInts = nrOfInts -1;
+        }
+        
+        
+        return y;
+     }
+     
+     function boolean bit(int x, int i){
+        if(  x = (x | twoToThe[i]) ){
+            return true;
+        }
+       return false;
+     }
+    
+    function Array twoToThe(){
+    
+        return twoToThe;
+    }
+}

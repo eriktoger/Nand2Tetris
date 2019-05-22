@@ -1,0 +1,85 @@
+class Memory {
+    static Array ram;
+    static Arrray heap;
+    static Array freeList;
+    static int freeListSize;
+    static int freeListNext;
+   
+    function void init(){
+        let ram = 0;
+        let heap = 2048;
+        // should it be free or freeList?
+        let freeList = 2048;
+        let heap[0] = 0;
+        let heap[1] = 14335;
+        
+        return;
+    }
+    
+    function int peek(int address) {
+        return ram[address];
+    
+    }
+    
+    function void poke(int address, int value) {
+         let ram[address] = value;
+        return;
+    }
+    
+    function int alloc (int size){
+        var int next;
+        var int newList;
+        var int newSize;
+        var int oldSize;
+        let next = freeList;
+            
+        // i think i want a while here
+        // i want to go thorugh the linked list
+        while( ~(next = 0)){
+             // the size of the current list
+             let oldSize = Memory.peek(next+1);
+            
+             // calculating the new size of the current list             
+             let newSize = oldSize - (size+2);
+             if(newSize > 0){
+                // calculating were the newList begins
+                // update the size of the current list 
+                do Memory.poke( next+1, newSize);
+                
+                // the newLast start 4 steps in 
+                let newList = next + newSize + 4;
+                
+                // the pointer to next list (maybe we dont need to set it here but in dealloc)
+                do Memory.poke(newList -2, 0 );
+                // the size of the newList
+                do Memory.poke(newList -1, size );
+                 
+                // 
+                
+                return newList;
+             }
+            
+            let next = Memory.peek(next); // where is the next list!
+        }
+        
+        // we are out of heap!
+        return 0 ;
+    }
+    
+    function void deAlloc (int object){
+        // this is wrong
+        var int next ;
+        let next = freeList;
+        // we have to go through the list and add it to the end.
+        while( ~(Memory.peek(next) = 0)){
+            let next = Memory.peek(next);
+        }
+        
+        // next is always 0, do we really want to poke 0?
+        
+        do Memory.poke(next,object);
+        do Memory.poke(object, 0);
+        return;
+    }
+    
+}

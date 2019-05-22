@@ -1,0 +1,295 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Screen.jack
+
+/**
+ * A library of functions for displaying graphics on the screen.
+ * The Hack physical screen consists of 512 rows (indexed 0..511, top to bottom)
+ * of 256 pixels each (indexed 0..255, left to right). The top left pixel on 
+ * the screen is indexed (0,0).
+ */
+class Screen {
+    
+    static boolean color;
+    static int screen;
+
+    /** Initializes the Screen. */
+    function void init() {
+        let screen = 16384;
+        let color = true;
+        
+        return;
+    }
+
+    /** Erases the entire screen. */
+    function void clearScreen() {
+        var int max;
+        var int temp;
+        let max = 24577;
+        let temp = screen;
+        while( temp < max){
+            do Memory.poke(temp,0);
+            let temp = temp + 1;
+        }
+        
+        return;
+    }
+
+    /** Sets the current color, to be used for all subsequent drawXXX commands.
+     *  Black is represented by true, white by false. */
+    function void setColor(boolean b) {
+        if(b){
+            let color = true;
+        }
+        else{
+            let color = false;
+        }
+        
+        return;
+    }
+
+    /** Draws the (x,y) pixel, using the current color. */
+    function void drawPixel(int x, int y) {
+        var int adress;
+        var int value;
+        var int i;
+        var int inverse;
+        var Array twoToThe;
+        let i = (x & 15);
+        let adress =  (32*y) + (x/16);
+        let value = Memory.peek(screen + adress);
+        let twoToThe = Math.twoToThe();       
+        
+        if(color){
+            // set pixel to black
+            let value = (value | twoToThe[i]);
+            do Memory.poke(screen + adress, value);    
+             
+        }
+        else{
+            // set pixel to white
+            //looks like i works but im not totally sure
+            let inverse = -twoToThe[i] -1;
+            let value = (value & inverse);
+            do Memory.poke(screen + adress, value);
+        }
+        
+        return;
+    }
+
+    /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
+    function void drawLine(int x1, int y1, int x2, int y2) {
+        var int a, b , dx , dy , diff ,temp, adress;
+        let a = 0;
+        let b = 0;
+        let diff = 0;
+        
+        if( (x1=x2) & (y1=y2) ) {
+            do Screen.drawPixel(x1,y1);
+            return;
+        }
+        
+        if( x1 = x2){
+            // straight vertical line;
+            if(y1 > y2){
+              let temp = y2;
+              let y2 = y1;
+              let y1 = temp;  
+            }
+            // we start att the lowest number which is y1.
+            
+            let dy = y2-y1;
+            while( b < dy){
+                do Screen.drawPixel(x1,y1+b);
+                let b = b+1;
+            }
+            
+            return;
+        
+        }
+        
+        
+        if( y1 = y2){
+            // straight horisontal  line;
+              if(x1 > x2){
+                  let temp = x2;
+                  let x2 = x1;
+                  let x1 = temp;  
+                }
+            // we start at the lowest number which is x1.
+            
+            let dx = x2-x1;
+            while( a < dx){
+                //do Output.printInt(( (x1+a) & 15));
+                //do Output.printString(" ");
+                // check if we can fill a while word at a time
+                if(  ( ( (x1+a) & 15) = 0) & ( (a+15) < dx ) ){
+                    // this did speed up the drawings.
+                    let adress =  (32*y1) + ( (x1 + a )/16);
+                    if(color){
+                        do Memory.poke(screen + adress,-1);
+                    }
+                    else{
+                        do Memory.poke(screen + adress,0);
+                    }
+                    
+                    let a = a+16;
+                }
+                
+                else{
+                    do Screen.drawPixel(x1+a,y1);
+                    let a = a+1;
+                }
+                
+            }
+            return;
+        
+        }
+        
+        if( (x2 < x1) & (y2 < y1)  ){
+            // change to standard if possible
+            let temp = x2;
+            let x2 = x1;
+            let x1 = temp;
+            
+            let temp = y2;
+            let y2 = y1;
+            let y1 = temp;
+        
+        }
+        
+        if( (x2 > x1) & (y2 > y1) ){
+            // this is standard;
+            // going from upper left to lower right
+            let dx = x2-x1;
+            let dy = y2-y1;
+            
+              while( (~(a>dx) ) & (~(b>dy) ) ){
+            
+                do Screen.drawPixel(x1+a,y1+b);
+
+                if(diff < 0){
+                    let a = a + 1;
+                    let diff = diff + dy; 
+                }
+                else {
+                    let b = b + 1;
+                    let diff = diff - dx; 
+                }
+        
+            }
+            
+            return;
+        }
+        else{
+        // now we go the other diagnoal
+        //  y2 > y1
+        // and x2 < x1
+        // otherwise i just change the p1 and p2
+        // this way we always go upper right to lower left     
+            if(y2 < y1){
+                let  temp = y2;
+                let y2 = y1;
+                let y1 = temp;
+                
+                let temp = x2;
+                let x2 = x1;
+                let x1 = temp;
+            }
+            
+            let dx = x1-x2;
+            let dy = y2-y1;
+            
+            // we go down (b+1) but we go left (a-1)
+            // and thats why we have -a instead 
+            while( (~( (-a) >dx) ) & (~(b>dy) ) ){
+            
+                do Screen.drawPixel(x1+a,y1+b);
+
+                if(diff < 0){
+                    let a = a - 1;
+                    let diff = diff + dy; 
+                }
+                else {
+                    let b = b + 1;
+                    let diff = diff - dx; 
+                }
+        
+        
+            }
+             return;
+        }
+    
+    }
+
+    /** Draws a filled rectangle whose top left corner is (x1, y1)
+     * and bottom right corner is (x2,y2), using the current color. */
+    function void drawRectangle(int x1, int y1, int x2, int y2) {
+        
+        // seem to work
+        var int a,b,dx,dy,temp;
+        // this way p1 is always above p2
+        
+        
+        if(y2 < y1){
+            let temp = y2;
+            let y2 = y1;
+            let y1 = temp;
+            
+            let temp = x2;
+            let x2 = x1;
+            let x1 = temp;
+        }
+        
+        if( y1=y2){
+            // otherwise dy = 0 and no while is enterd
+            do Screen.drawLine(x1,y1,x2,y2);
+            return;
+        }
+        
+        let dy = y2-y1; 
+        let a = 0;
+        let b = 0;
+        if(x1 < x2){
+            let dx = x2-x1;
+         // we build to the right (and always down)
+            while( b < dy){
+               do Screen.drawLine(x1,y1+b,x2,y1+b);
+                let b=b+1;
+            }
+            
+        }
+        else{
+         // we build to the left ( and always down)
+            let dx = x1-x2;
+             while( b < dy){
+                do Screen.drawLine(x2,y1+b,x1,y1+b);
+                let b=b+1;
+            }
+            
+        }
+        
+            
+        return;
+    }
+
+    /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
+    function void drawCircle(int x, int y, int r) {
+        var int begin,dy,sqrtDiff;
+        if(r > 181) {
+            // prevent overflow
+            let r = 181;
+        }
+        let begin = -r;
+        
+        while(begin < (r + 1 )){
+            //let dy = begin;
+            let sqrtDiff = Math.sqrt(Math.multiply(r,r) - Math.multiply(begin,begin) );
+            do Screen.drawLine(x - sqrtDiff, y+begin,x+sqrtDiff,y+begin);
+            let begin = begin +1;
+        }
+        
+        return;
+    }
+}
