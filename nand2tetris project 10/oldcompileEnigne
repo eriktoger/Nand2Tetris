@@ -1,0 +1,551 @@
+// this was my first try
+
+// Do i need to keep track of { and } when counterleft == counterRight I break out of 
+// compileEninge (via return)
+// compileEngine is rekursiv and each call is a new layer
+// that means that the layer dictats the intend of the output file
+// so indent should be a variable as well
+
+
+void compileEngine2 (const vector < pair<string,string> > &tokens,int &counter,ofstream &file, pair <int,int> &nrOfPara, pair <int,int> &nrOfCurl, int &indentLevel){
+  //cout << 1<<endl;
+  if(counter >= tokens.size()){
+    return;
+  }
+
+  string first = tokens[counter].first;
+  string second = tokens[counter].second;
+  
+  //cout << 2<<endl;
+  //if second is keyword, should we have a big switch?
+  if(second == "keyword"){
+
+    if(first =="class"){
+
+      tabs(indentLevel,file);
+      file<<"<class>"<<endl;
+      indentLevel++;
+
+      tabs(indentLevel,file);
+      file <<"<keyword> " <<first <<" </keyword>"<<endl;
+      counter++;
+
+      int classCounter = 0;
+      // should be changed to a tempDiff of parentthessis
+      int breakCounter2 = 0;
+      while(nrOfCurl.first >  nrOfCurl.second || classCounter < 2){
+        compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+        classCounter++;
+        breakCounter2++;
+        if(breakCounter2 > 1000){
+          cout << "break2"<< endl;
+          break;
+        }
+      }
+      indentLevel--;
+      tabs(indentLevel,file);
+      file<<"</class>"<<endl;
+      counter++;
+      return;
+    }
+
+    if(first == "return"){
+      tabs(indentLevel,file);
+      file << "<returnStatement>" <<endl;
+      indentLevel++;
+
+      tabs(indentLevel,file);
+      file << "<keyword> " << first << "</keyword>"<< endl;
+      counter++;
+
+      // add expression
+      while(tokens[counter].first != ";"){
+
+      }
+
+      // add ;
+      compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+      indentLevel--;
+      tabs(indentLevel,file);
+      file << "</returnStatement>" <<endl;
+      return;
+    }
+
+    if(first == "void"){
+      tabs(indentLevel,file);
+      file <<"<keyword> " << first << " </keyword>"<<endl;
+      counter++;
+      return;
+    }
+
+    if (first == "int"){
+      tabs(indentLevel,file);
+      file <<"<keyword> " << first << " </keyword>"<<endl;
+      counter++;
+      return;
+    }
+
+  }
+
+  //cout << 3<<endl;
+  if(second == "symbol" ){
+
+    // counting {}
+    if (first== "{"){
+      nrOfCurl.first++;
+    }
+    if(first =="}"){
+      nrOfCurl.second++;
+    }
+
+    if(first == "(" ){
+      nrOfPara.first++;
+    }
+    if(first == ")" ){
+      nrOfPara.second++;
+    }
+
+    tabs(indentLevel, file);
+    file << "<symbol> " << first <<" </symbol>"<<endl;
+    counter++;
+    return;
+  }
+
+  if(second == "identifier"){
+    tabs(indentLevel,file);
+    file<<"<identifier> "<< first <<" </identifier>" <<endl;
+    counter++;
+    return;
+  }
+
+  if(first == "static"){
+    // add classVarDec and indentLevel++
+    tabs(indentLevel,file);
+    file <<"<classVarDec> "<<endl;
+    indentLevel++;
+    tabs(indentLevel,file);
+    file << "<keyword> " << first << " </keyword>"<<endl;
+    counter++;   
+    int breakCounter4 = 0;
+    while(tokens[counter].first != ";"){
+      compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+      breakCounter4++;
+      if(breakCounter4 > 1000){
+        cout <<"break4"<<endl;
+        break;
+      }
+    }
+    // adding the ;
+    compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+    indentLevel--;
+    tabs(indentLevel,file);
+    file <<"</classVarDec> "<<endl;
+    //counter++; // why isnt this needed?
+    return; // otherwise some content is skipped
+
+  }
+
+  if(first == "boolean"){
+    tabs(indentLevel,file);
+    file <<"<keyword> " << first <<" </keyword>"<<endl;
+  }
+  if(first == "field"){
+    
+  }
+
+  // this means we have a subrotutineDec
+  if (first == "constructor" || first== "function" ||first == "method"){
+    //cout << "eeeeeeeeeeeeeeeeeeeeee"<<endl;
+    tabs(indentLevel,file);
+    file <<"<subroutineDec> " << endl;
+    indentLevel++;
+    tabs(indentLevel,file);
+    file << "<keyword> "<< first << " </keyword>"<<endl; 
+    counter++;
+
+    // void | type
+    compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+    // subrutine name
+    compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+    // (
+    compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+    tabs(indentLevel,file);
+    file << "<parameterList>" <<endl;
+    indentLevel++;
+
+  // call the compileEngine a bunch of times
+    int functionCounter = 0; 
+    
+    // we need the +1 beacause otherwise it is done directly
+    // we enter equal, and after the first { we are waitning for the }
+    // constructor and method (or other functions maybe dont have {)
+    // should use tokens[counter] == "{" to set some bool.
+    int funcDiffPara = nrOfPara.first - nrOfPara.second;
+    cout << funcDiffPara<<endl;
+    bool funcBool = true;
+
+    int breakCounter3 = 0;
+    // this counting of {()} is so shaky...
+    while( funcDiffPara == ( nrOfPara.first - nrOfPara.second)){
+      // || funcbool 
+       /*
+       if(tokens[counter].first =="("){
+        funcBool = false;
+      }
+      */
+      cout << "----"<<endl;
+      cout << nrOfPara.first<<" "<< nrOfPara.second<< " "<< tokens[counter].first<< endl;
+
+      // if diff is 1 and next is ), its time to break
+      if(nrOfPara.first == (nrOfPara.second+1) && tokens[counter].first == ")"){
+          break;
+      }
+      compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+     
+      cout << nrOfPara.first<<" "<< nrOfPara.second<< " "<< tokens[counter].first<< endl;
+     
+      breakCounter3++;
+      if(breakCounter3 > 20){
+          cout << "break3"<<endl;
+          break;
+      }
+
+    }
+
+    indentLevel--;
+    tabs(indentLevel,file);
+    file << "</parameterList>" <<endl;
+
+    //adding )
+    compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+    //subroutineBody
+    tabs(indentLevel,file);
+    file << "<subroutineBody>" << endl;
+    indentLevel++;
+
+    // adding {
+    compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+    // adding everthing between {}
+    int funcCurl = nrOfCurl.first - nrOfCurl.second;
+    int breakCounterFunc =0;
+    while(true){
+
+       // we need one more } to break
+       //
+       if(funcCurl == (nrOfCurl.first - nrOfCurl.second) && tokens[counter].first == "}"){
+          break;
+      }
+
+      // adding the subrotinebody
+      compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+
+      breakCounterFunc++;
+      if(breakCounterFunc > 100){
+        cout << "breakCounterFunc"<<endl;
+        break;
+      }
+    }
+
+    // adding the last }
+    compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+    indentLevel--;
+    tabs(indentLevel,file);
+    file <<"</subroutineBody>" << endl;
+
+
+    indentLevel--;
+    tabs(indentLevel,file);
+    file <<"</subroutineDec>" << endl;
+    return;
+  }
+
+
+  // this should be a function
+  if(first == "var"){
+    tabs(indentLevel,file);
+    file <<"<varDec>"<<endl;
+    indentLevel++;
+
+    tabs(indentLevel,file);
+    file<<"<keyword> " << "var" <<" </keyword>"<<endl;
+    counter++;
+
+    // adding type
+    compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+    // adding varname
+    compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+    while(tokens[counter].first == ","){
+      // adding ,
+      compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+      // adding varname
+      compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+    }
+      // adding ;
+    compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+    indentLevel--;
+    tabs(indentLevel,file);
+    file <<"</varDec>"<<endl;
+    return;
+  }
+
+  //statments
+  
+  if(first =="let" || first == "if" || first == "while" ||
+     first == "do" ||first == "return"){
+    
+    tabs(indentLevel,file);
+    file <<"<statements>" << endl;
+    indentLevel++;
+
+    // all statments are enclosed by { }
+    // and when we hit the first one we have passed {, so when we are to 
+    // pass the next one we quit 
+
+    // statCurlDiff should be like 1,2 or 3
+    //when we 
+    int statCurlDiff = nrOfCurl.first - nrOfCurl.second;
+
+    // nrOfCurl.first can be added but as soon as we decline 1
+    // 
+    int statBreak = 0;
+    while(statCurlDiff < nrOfCurl.first - nrOfCurl.second 
+          || tokens[counter].first != "}" ) {
+      
+      first = tokens[counter].first;
+      second = tokens[counter].second;
+
+      if(first == "return"){
+        break;
+      }
+
+      statBreak++;
+      if (statBreak > 20){
+        cout <<"statBreak"<<endl;
+        break;
+      }
+
+    if(first == "let"){
+      tabs(indentLevel,file);
+      file << "<letStatement>"<<endl;
+      indentLevel++;
+
+      tabs(indentLevel,file);
+      file << "<keyword> " << first << " </keyword>" << endl;
+      counter++;
+
+      // adding varName
+      compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+      // if indexed the varName , varName[exp]
+      if(tokens[counter].first == "["){
+        // [
+
+        // expression  
+
+        // ]
+
+      }
+
+      // adding =
+      compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+
+      // adding expression
+      tabs(indentLevel,file);
+      file << "<expression>"<<endl;
+      indentLevel++;
+
+      // expression always starts with a term
+      tabs(indentLevel,file);
+      file << "<term>"<<endl;
+      indentLevel++;
+
+      compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+      indentLevel--;
+      tabs(indentLevel,file);
+      file << "</term>"<<endl;
+
+      // what if we dont have an ;?
+
+      indentLevel--;
+      tabs(indentLevel,file);
+      file << "</expression>"<<endl;
+
+      // adding ;
+      compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+      indentLevel--;
+      tabs(indentLevel,file);
+      file << "</letStatement>"<<endl;
+
+      //return;
+    } // end let
+
+    if(first == "do"){
+      tabs(indentLevel,file);
+      file << "<doStatement>"<<endl;
+      indentLevel++;
+
+      tabs(indentLevel,file);
+      file << "<keyword> " << first << " </keyword>" << endl;
+      counter++;
+
+      // subrotincall
+      // either foo() or foo.bar()
+      if(tokens[counter+1].first == "."){
+        // we have foo.bar()
+        compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+        compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+        compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+      }
+      else{
+        // we have foo()
+        compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+      }
+
+      // now we have ( expressionlist )
+    
+      
+      // (
+      compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+      // expressionlist
+      tabs(indentLevel,file);
+      file <<"<expressionlist>"<<endl;
+      indentLevel++;
+      if(tokens[counter].first != ")"){
+        // expressionlist is not empty
+
+      }
+      
+      indentLevel--;
+      tabs(indentLevel,file);
+      file <<"</expressionlist>"<<endl;
+
+
+      //  )
+      compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+      // ;
+      compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+      indentLevel--;
+      tabs(indentLevel,file);
+      file << "</doStatement>"<<endl;
+      //return;
+    } // end do
+
+    if(first == "if"){
+      tabs(indentLevel,file);
+      file << "<ifStatement>"<<endl;
+      indentLevel++;
+
+      tabs(indentLevel,file);
+      file << "<keyword> " << first << " </keyword>" << endl;
+      counter++;
+
+      // add (
+      compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+      // add expression
+      compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+
+
+    }
+
+    if(first == "else"){
+      tabs(indentLevel,file);
+      file << "<elseStatement>"<<endl;
+      indentLevel++;
+
+      tabs(indentLevel,file);
+      file << "<keyword> " << first << " </keyword>" << endl;
+      counter++;
+    }
+
+    } // end while
+
+    // add the return
+    if(first == "return"){
+      compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+    }
+
+    indentLevel--;
+    tabs(indentLevel,file);
+    file << "</statements>"<<endl;
+      return;
+     }
+
+  /*
+  if(first == "(" ){
+    // this is a parameterlist or expressionlist
+    // and the way to know is to backtrack?
+    int backTrack = 1;
+
+    while(tokens[counter-backTrack].second != "keyword"){
+      backTrack++;
+      if(backTrack >= tokens.size()){
+        cout<<"brak backtrack"<<endl;
+        break;
+      }
+    } 
+    string whatKeyword = tokens[counter-backTrack].first;
+    //cout<<"look"<<endl;
+    //cout<< tokens[counter-backTrack].first <<" " << tokens[counter-backTrack].second //<<endl;
+    // depending on keyword, we have some different options
+    
+    //what if we have a exprssionlist inside a parameterlist? or explist in explist?
+    // can we just close it at next ) or do we need to keep scores (again)
+
+  // if void,char,int,boolean we have a parameterlist
+    if(whatKeyword == "void" || whatKeyword == "int" ||
+       whatKeyword == "char" || whatKeyword == "boolean"){
+         tabs(indentLevel,file);
+         file << "<parameterList>" <<endl;
+         indentLevel++;
+
+        //bool firstRightPara = false; // isnt needed here?
+        int tempDiffPara = nrOfPara.first-nrOfPara.second; // should be 1
+        int breakCount = 0;
+        while(nrOfPara.first > nrOfPara.second){
+          compileEngine(tokens,counter,file,nrOfPara, nrOfCurl, indentLevel);
+          breakCount++;
+          if(breakCount > 100){
+            cout << "break1"<<endl;
+            break;
+          }
+        } 
+        
+        indentLevel--;
+        tabs(indentLevel,file);
+        file << "</parameterList>" <<endl;
+    }
+
+    // if do,if, while we have expressionlist 
+    if(whatKeyword == "do" || whatKeyword == "if" ||
+       whatKeyword == "else"){
+
+    }
+  
+  
+  }
+  */
+
+  //cout << 4<<endl;
+  //file << tokens[counter].first;
+  //cout << 5<<endl;
+  //advance to next token in vector
+  counter++;
+  
+}
