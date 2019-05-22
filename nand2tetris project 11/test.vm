@@ -1,0 +1,908 @@
+function SnakeGame.new 0
+push constant 9
+call Memory.alloc 1
+pop pointer 0
+push constant 300
+push constant 126
+push constant 200
+call Snake.new 3
+pop this 0
+push constant 0
+pop this 1
+push constant 3
+pop this 2
+push constant 0
+pop this 3
+push constant 0
+pop this 4
+push constant 0
+pop this 5
+push constant 0
+pop this 8
+push pointer 0
+call SnakeGame.apple 1
+pop temp 0
+push pointer 0
+return
+function SnakeGame.dispose 0
+push argument 0
+pop pointer 0
+push this 0
+call Snake.dispose 1
+pop temp 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+push constant 0
+return
+pop temp 0
+function SnakeGame.moveSnake 4
+push argument 0
+pop pointer 0
+push pointer 0
+push this 0
+call Snake.getXcord 1
+push this 0
+call Snake.getYcord 1
+call SnakeGame.dist 3
+pop local 2
+push this 0
+call Snake.getCurrDir 1
+pop local 0
+push local 2
+push constant 5
+lt
+not
+if-goto IL176
+push pointer 0
+call SnakeGame.pointsApple 1
+pop temp 0
+goto EL184
+label IL176
+label EL184
+push this 0
+call Snake.getAlive 1
+pop local 1
+push local 1
+not
+not
+if-goto IL197
+push constant 10
+call String.new 1
+push constant 83
+call String.appendChar 2
+push constant 117
+call String.appendChar 2
+push constant 112
+call String.appendChar 2
+push constant 101
+call String.appendChar 2
+push constant 114
+call String.appendChar 2
+push constant 68
+call String.appendChar 2
+push constant 101
+call String.appendChar 2
+push constant 97
+call String.appendChar 2
+push constant 116
+call String.appendChar 2
+push constant 104
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push pointer 0
+call SnakeGame.death 1
+pop temp 0
+goto EL213
+label IL197
+label EL213
+push this 1
+push constant 1
+eq
+push local 0
+push constant 2
+eq
+not
+and
+not
+if-goto IL227
+push this 0
+call Snake.moveUp 1
+pop temp 0
+push this 0
+call Snake.updateSnake 1
+pop temp 0
+push this 0
+push constant 1
+call Snake.setCurrDir 2
+pop temp 0
+goto EL252
+label IL227
+label EL252
+push this 1
+push constant 1
+eq
+push local 0
+push constant 2
+eq
+and
+not
+if-goto IL265
+push local 0
+pop this 1
+goto EL273
+label IL265
+label EL273
+push this 1
+push constant 2
+eq
+push local 0
+push constant 1
+eq
+not
+and
+not
+if-goto IL287
+push this 0
+call Snake.moveDown 1
+pop temp 0
+push this 0
+call Snake.updateSnake 1
+pop temp 0
+push this 0
+push constant 2
+call Snake.setCurrDir 2
+pop temp 0
+goto EL312
+label IL287
+label EL312
+push this 1
+push constant 2
+eq
+push local 0
+push constant 1
+eq
+and
+not
+if-goto IL325
+push local 0
+pop this 1
+goto EL333
+label IL325
+label EL333
+push this 1
+push constant 3
+eq
+push local 0
+push constant 4
+eq
+not
+and
+not
+if-goto IL345
+push this 0
+call Snake.moveLeft 1
+pop temp 0
+push this 0
+call Snake.updateSnake 1
+pop temp 0
+push this 0
+push constant 3
+call Snake.setCurrDir 2
+pop temp 0
+goto EL370
+label IL345
+label EL370
+push this 1
+push constant 3
+eq
+push local 0
+push constant 4
+eq
+and
+not
+if-goto IL381
+push local 0
+pop this 1
+goto EL389
+label IL381
+label EL389
+push this 1
+push constant 4
+eq
+push local 0
+push constant 3
+eq
+not
+and
+not
+if-goto IL401
+push this 0
+call Snake.moveRight 1
+pop temp 0
+push this 0
+call Snake.updateSnake 1
+pop temp 0
+push this 0
+push constant 4
+call Snake.setCurrDir 2
+pop temp 0
+goto EL426
+label IL401
+label EL426
+push this 1
+push constant 4
+eq
+push local 0
+push constant 3
+eq
+and
+not
+if-goto IL437
+push local 0
+pop this 1
+goto EL445
+label IL437
+label EL445
+push constant 0
+return
+pop temp 0
+function SnakeGame.drawBorder 2
+push argument 0
+pop pointer 0
+push constant 5
+call String.new 1
+pop local 0
+push local 0
+push this 2
+call String.setInt 2
+pop temp 0
+push constant 10
+call String.new 1
+pop local 1
+push constant 0
+push constant 0
+call Output.moveCursor 2
+pop temp 0
+push local 1
+push this 3
+call String.setInt 2
+pop temp 0
+call Output.println 0
+pop temp 0
+push constant 6
+call String.new 1
+push constant 83
+call String.appendChar 2
+push constant 110
+call String.appendChar 2
+push constant 97
+call String.appendChar 2
+push constant 107
+call String.appendChar 2
+push constant 101
+call String.appendChar 2
+push constant 33
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+call Output.println 0
+pop temp 0
+push constant 7
+call String.new 1
+push constant 76
+call String.appendChar 2
+push constant 105
+call String.appendChar 2
+push constant 118
+call String.appendChar 2
+push constant 101
+call String.appendChar 2
+push constant 115
+call String.appendChar 2
+push constant 58
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push this 2
+call Output.printInt 1
+pop temp 0
+call Output.println 0
+pop temp 0
+push constant 7
+call String.new 1
+push constant 83
+call String.appendChar 2
+push constant 99
+call String.appendChar 2
+push constant 111
+call String.appendChar 2
+push constant 114
+call String.appendChar 2
+push constant 101
+call String.appendChar 2
+push constant 58
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push this 3
+call Output.printInt 1
+pop temp 0
+call Output.println 0
+pop temp 0
+call Output.println 0
+pop temp 0
+push constant 10
+call String.new 1
+push constant 72
+call String.appendChar 2
+push constant 105
+call String.appendChar 2
+push constant 45
+call String.appendChar 2
+push constant 115
+call String.appendChar 2
+push constant 99
+call String.appendChar 2
+push constant 111
+call String.appendChar 2
+push constant 114
+call String.appendChar 2
+push constant 101
+call String.appendChar 2
+push constant 58
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+call Output.println 0
+pop temp 0
+push this 4
+call Output.printInt 1
+pop temp 0
+push constant 1
+neg
+call Screen.setColor 1
+pop temp 0
+push constant 100
+push constant 0
+push constant 100
+push constant 255
+call Screen.drawLine 4
+pop temp 0
+push constant 99
+push constant 0
+push constant 99
+push constant 255
+call Screen.drawLine 4
+pop temp 0
+push constant 511
+push constant 0
+push constant 511
+push constant 255
+call Screen.drawLine 4
+pop temp 0
+push constant 510
+push constant 0
+push constant 510
+push constant 255
+call Screen.drawLine 4
+pop temp 0
+push constant 100
+push constant 0
+push constant 511
+push constant 0
+call Screen.drawLine 4
+pop temp 0
+push constant 100
+push constant 1
+push constant 511
+push constant 1
+call Screen.drawLine 4
+pop temp 0
+push constant 100
+push constant 255
+push constant 511
+push constant 255
+call Screen.drawLine 4
+pop temp 0
+push constant 100
+push constant 254
+push constant 511
+push constant 254
+call Screen.drawLine 4
+pop temp 0
+push constant 0
+return
+pop temp 0
+function SnakeGame.run 2
+push argument 0
+pop pointer 0
+push constant 0
+pop local 1
+push pointer 0
+call SnakeGame.drawBorder 1
+pop temp 0
+label WL755
+push this 5
+not
+not
+if-goto WL757
+label WL761
+push local 0
+push constant 0
+eq
+not
+if-goto WL764
+call Keyboard.keyPressed 0
+pop local 0
+push pointer 0
+call SnakeGame.moveSnake 1
+pop temp 0
+goto WL761
+label WL764
+push local 1
+push constant 1
+add
+pop local 1
+push local 1
+push constant 10
+call Math.divide 2
+push constant 1
+eq
+not
+if-goto IL797
+push this 3
+push constant 1
+add
+pop this 3
+push constant 3
+push constant 7
+call Output.moveCursor 2
+pop temp 0
+push this 3
+call Output.printInt 1
+pop temp 0
+push constant 0
+pop local 1
+goto EL830
+label IL797
+label EL830
+push local 0
+push constant 81
+eq
+not
+if-goto IL835
+push constant 1
+neg
+pop this 5
+goto EL843
+label IL835
+label EL843
+push local 0
+push constant 131
+eq
+not
+if-goto IL848
+push constant 1
+pop this 1
+goto EL856
+label IL848
+label EL856
+push local 0
+push constant 133
+eq
+not
+if-goto IL861
+push constant 2
+pop this 1
+goto EL869
+label IL861
+label EL869
+push local 0
+push constant 130
+eq
+push this 1
+push constant 0
+eq
+not
+and
+not
+if-goto IL881
+push constant 3
+pop this 1
+goto EL889
+label IL881
+label EL889
+push local 0
+push constant 132
+eq
+not
+if-goto IL894
+push constant 4
+pop this 1
+goto EL902
+label IL894
+label EL902
+label WL904
+push local 0
+push constant 0
+eq
+not
+not
+if-goto WL910
+call Keyboard.keyPressed 0
+pop local 0
+push pointer 0
+call SnakeGame.moveSnake 1
+pop temp 0
+goto WL904
+label WL910
+goto WL755
+label WL757
+push constant 0
+return
+pop temp 0
+function SnakeGame.death 0
+push argument 0
+pop pointer 0
+push this 2
+push constant 1
+sub
+pop this 2
+push this 0
+push constant 1
+neg
+call Snake.setAlive 2
+pop temp 0
+push this 3
+push this 4
+gt
+not
+if-goto IL957
+push this 3
+pop this 4
+push constant 0
+pop this 3
+goto EL970
+label IL957
+label EL970
+push this 2
+push constant 0
+gt
+not
+if-goto IL975
+push this 0
+push constant 300
+push constant 126
+call Snake.initSnake 3
+pop temp 0
+call Screen.clearScreen 0
+pop temp 0
+push pointer 0
+call SnakeGame.drawBorder 1
+pop temp 0
+push constant 0
+pop this 1
+push this 0
+call Snake.draw 1
+pop temp 0
+push pointer 0
+call SnakeGame.apple 1
+pop temp 0
+goto EL1017
+label IL975
+push this 0
+call Snake.erase 1
+pop temp 0
+push this 0
+push constant 300
+push constant 126
+call Snake.initSnake 3
+pop temp 0
+push pointer 0
+call SnakeGame.gameOver 1
+pop temp 0
+label EL1017
+push constant 0
+return
+pop temp 0
+function SnakeGame.gameOver 1
+push argument 0
+pop pointer 0
+call Screen.clearScreen 0
+pop temp 0
+push constant 11
+push constant 22
+call Output.moveCursor 2
+pop temp 0
+push constant 9
+call String.new 1
+push constant 71
+call String.appendChar 2
+push constant 97
+call String.appendChar 2
+push constant 109
+call String.appendChar 2
+push constant 101
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+push constant 79
+call String.appendChar 2
+push constant 118
+call String.appendChar 2
+push constant 101
+call String.appendChar 2
+push constant 114
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push constant 13
+push constant 22
+call Output.moveCursor 2
+pop temp 0
+push constant 12
+call String.new 1
+push constant 72
+call String.appendChar 2
+push constant 105
+call String.appendChar 2
+push constant 103
+call String.appendChar 2
+push constant 104
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+push constant 83
+call String.appendChar 2
+push constant 99
+call String.appendChar 2
+push constant 111
+call String.appendChar 2
+push constant 114
+call String.appendChar 2
+push constant 101
+call String.appendChar 2
+push constant 58
+call String.appendChar 2
+push constant 32
+call String.appendChar 2
+call Output.printString 1
+pop temp 0
+push this 4
+call Output.printInt 1
+pop temp 0
+label WL1108
+push this 5
+not
+not
+if-goto WL1110
+call Keyboard.keyPressed 0
+pop local 0
+push local 0
+push constant 81
+eq
+not
+if-goto IL1126
+push constant 1
+neg
+pop this 5
+goto EL1134
+label IL1126
+label EL1134
+goto WL1108
+label WL1110
+push constant 0
+return
+pop temp 0
+function SnakeGame.apple 0
+push argument 0
+pop pointer 0
+push constant 150
+pop this 6
+push constant 150
+pop this 7
+push constant 1
+neg
+call Screen.setColor 1
+pop temp 0
+push constant 150
+push constant 150
+push constant 5
+call Screen.drawCircle 3
+pop temp 0
+push constant 0
+return
+pop temp 0
+function SnakeGame.dist 4
+push argument 0
+pop pointer 0
+push this 6
+push argument 1
+sub
+push this 6
+push argument 1
+sub
+call Math.multiply 2
+pop local 1
+push this 7
+push argument 2
+sub
+push this 7
+push argument 2
+sub
+call Math.multiply 2
+pop local 2
+push local 1
+push local 2
+add
+pop local 3
+push local 3
+push constant 0
+gt
+not
+if-goto IL1256
+push local 3
+call Math.sqrt 1
+return
+goto EL1267
+label IL1256
+label EL1267
+push constant 999
+return
+function SnakeGame.pointsApple 2
+push argument 0
+pop pointer 0
+push pointer 0
+push this 0
+call Snake.getXcord 1
+push this 0
+call Snake.getYcord 1
+call SnakeGame.dist 3
+pop local 0
+push this 8
+push constant 1
+add
+pop this 8
+push constant 0
+call Screen.setColor 1
+pop temp 0
+push this 6
+push this 7
+push constant 5
+call Screen.drawCircle 3
+pop temp 0
+push this 3
+push constant 10
+add
+pop this 3
+push constant 3
+push constant 7
+call Output.moveCursor 2
+pop temp 0
+push this 3
+call Output.printInt 1
+pop temp 0
+push this 0
+call Snake.getLength 1
+push constant 100
+add
+pop local 1
+push local 1
+push this 0
+call Snake.getMaxLength 1
+lt
+not
+if-goto IL1375
+push this 0
+push local 1
+call Snake.setLength 2
+pop temp 0
+goto EL1386
+label IL1375
+label EL1386
+push this 8
+push constant 1
+eq
+not
+if-goto IL1391
+push constant 120
+pop this 6
+push constant 50
+pop this 7
+goto EL1404
+label IL1391
+label EL1404
+push this 8
+push constant 2
+eq
+not
+if-goto IL1409
+push constant 150
+pop this 6
+push constant 200
+pop this 7
+goto EL1422
+label IL1409
+label EL1422
+push this 8
+push constant 3
+eq
+not
+if-goto IL1427
+push constant 300
+pop this 6
+push constant 150
+pop this 7
+goto EL1440
+label IL1427
+label EL1440
+push this 8
+push constant 4
+eq
+not
+if-goto IL1445
+push constant 250
+pop this 6
+push constant 50
+pop this 7
+goto EL1458
+label IL1445
+label EL1458
+push this 8
+push constant 5
+eq
+not
+if-goto IL1463
+push constant 400
+pop this 6
+push constant 200
+pop this 7
+goto EL1476
+label IL1463
+label EL1476
+push this 8
+push constant 6
+eq
+not
+if-goto IL1481
+push constant 200
+pop this 6
+push constant 70
+pop this 7
+goto EL1494
+label IL1481
+label EL1494
+push this 8
+push constant 7
+eq
+not
+if-goto IL1499
+push constant 450
+pop this 6
+push constant 120
+pop this 7
+push constant 0
+pop this 8
+goto EL1517
+label IL1499
+label EL1517
+push constant 1
+neg
+call Screen.setColor 1
+pop temp 0
+push this 6
+push this 7
+push constant 5
+call Screen.drawCircle 3
+pop temp 0
+push constant 0
+return
+pop temp 0

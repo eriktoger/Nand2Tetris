@@ -1,0 +1,15 @@
+class Point {
+
+   field int x, y; 
+
+   
+   constructor Point new(int Ax, int Ay) {
+      let x = Ax;
+      let y = Ay;
+      return this;
+   }
+
+   method getx(){
+     return x;
+   }
+}
