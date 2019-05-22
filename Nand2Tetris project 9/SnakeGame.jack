@@ -1,0 +1,337 @@
+
+/**
+ * Implements the snake game.
+ * This simple game allows the user to move a black snake around
+ * the screen.
+ * The 4 arrow keys are used to move the snake up, down, left, and right.
+ * If you eat and apple you get a bit longer!
+ */
+
+class SnakeGame {
+   field Snake snake; // the snake of this game
+   field int direction; // the snake's current direction: 
+                        // 0=none, 1=up, 2=down, 3=left, 4=right
+   field int lives;
+   field int score;
+   field int highScore;
+   field boolean exit;
+   field int xApple; // apple xcord.
+   field int yApple; // apple ycord
+   field int appleCounter;
+
+   /** Constructs a new snake Game. */
+   constructor SnakeGame new() {
+      // Creates  snake and positions it at (300,126)
+      // of the screen.
+      let snake = Snake.new(300, 126,200);
+      let direction = 0;  // initial state is no movement
+      let lives = 3;
+      let score = 0;
+      let highScore = 0;
+      let exit = false;
+      let appleCounter = 0;
+      do apple(); // generate the first apple to the screen
+       return this;
+   }
+
+   /** Disposes this game. */
+   method void dispose() {
+      do snake.dispose();
+      do Memory.deAlloc(this);
+      return;
+   }
+
+   /*   * Moves the snake in the current directidon.
+        * Also checks if snake has eaten the apple
+        * And checks if snake is alive. If dead resests.
+   */
+   method void moveSnake() {
+      var int currDir;
+      var boolean boolAlive;
+      var int distance;
+      var int snakeLength; 
+       
+      // checks if snake is near apple 
+      let distance = dist(snake.getXcord(), snake.getYcord()); 
+     
+      
+      
+      let currDir = snake.getCurrDir();
+     
+      if( distance < 5 ) {
+          // eats apple, get score and generates new apple
+          do pointsApple();
+      }
+       
+      // checks if snake is dead 
+      let boolAlive = snake.getAlive();
+      if(~boolAlive){
+         do Output.printString("SuperDeath");
+         do death();
+       }
+       
+       
+      // move and update snake. It is forbidden to turn 180 degrees. 
+      if ( (direction = 1) & ~( currDir = 2) ) { // cant turn around
+          do snake.moveUp();
+          do snake.updateSnake();
+          do snake.setCurrDir(1);
+      }
+      if ( (direction = 1) & ( currDir = 2) ) {
+        let direction = currDir; //overrides input
+      }  
+       
+      if ( (direction)  = 2 & ~( currDir = 1)) {
+          do snake.moveDown();
+          do snake.updateSnake();
+          do snake.setCurrDir(2);
+      }
+      if ( (direction = 2) & ( currDir = 1) ) {
+        let direction = currDir; //overrides input
+      } 
+       
+       
+      if ( direction = 3 & ~(currDir =4)) {
+          do snake.moveLeft();
+          do snake.updateSnake();
+          do snake.setCurrDir(3);
+      }
+      if ( direction = 3 & (currDir = 4) ) { 
+        let direction = currDir; //overrides input
+      }
+       
+      if (direction = 4 & ~(currDir =3)) { 
+          do snake.moveRight();
+          do snake.updateSnake();
+          do snake.setCurrDir(4);
+      }
+       if (direction = 4 & (currDir = 3)) { 
+        let direction = currDir; //overrides input
+      }
+
+      // since my update snake is so slow no Sys.wait is needed. 
+     // do Sys.wait(1);  // delays the next movement
+      return;
+   }
+    
+    /** prints borders and stats */
+   method void drawBorder() {
+      var String livesString;
+      var String scoreString;
+       
+      let livesString = String.new(5);
+      do livesString.setInt(lives); 
+      let scoreString = String.new(10);
+      
+      //do Screen.clearScreen();
+      do Output.moveCursor(0,0); 
+      do scoreString.setInt(score);  
+      do Output.println();
+      do Output.printString("Snake!");
+      do Output.println();
+      
+      
+      do Output.printString("Lives: ");
+      do Output.printInt(lives); 
+      do Output.println();
+      do Output.printString("Score: ");
+      do Output.printInt(score);
+      do Output.println();
+      do Output.println();
+      do Output.printString("Hi-score: "); 
+      do Output.println(); 
+      do Output.printInt(highScore);
+       
+      do Screen.setColor(true); // set black 
+      do Screen.drawLine(100,0,100,255); // left border
+      do Screen.drawLine(99,0,99,255); // left border 
+      do Screen.drawLine(511,0,511,255);// righ border
+      do Screen.drawLine(510,0,510,255);// righ border 
+      do Screen.drawLine(100,0,511,0);// top border
+      do Screen.drawLine(100,1,511,1);// top border 
+      do Screen.drawLine(100,255,511,255); // bottom border
+      do Screen.drawLine(100,254,511,254); // bottom border 
+    
+      return;
+   }
+
+   /** Runs the game: handles the user's inputs and moves the snake accordingly */
+   method void run() {
+      var char key;  // the key currently pressed by the user
+      var int timer;
+      let timer = 0;
+      //var boolean exit;
+      
+      //let exit = false;
+      do drawBorder(); 
+     
+       
+      while (~exit) {
+         // waits for a key to be pressed
+ 
+         while (key = 0) {
+            let key = Keyboard.keyPressed();
+            do moveSnake();
+         }
+         // this one is a bit buggy, every time you press a button timer increse
+         // even if no moment (try to turn 180 degrees) occures. 
+         let timer = timer +1;
+         if( (timer / 10) = 1){
+            let score = score +1;
+            do Output.moveCursor(3,7);  
+            do Output.printInt(score);
+            let timer = 0; 
+            
+         }
+         
+          
+         if (key = 81)  { let exit = true; }     // q key
+         if (key = 131) { let direction = 1; }   // up arrow
+         if (key = 133) { let direction = 2; }   // down arrow
+         if (key = 130 & ~(direction =0 )) { // forbidden to start going left
+             let direction = 3; }   // left arrow
+         if (key = 132) { let direction = 4; }   // right arrow
+
+         // waits for the key to be released
+         while (~(key = 0)) {
+            let key = Keyboard.keyPressed();
+            do moveSnake();
+         }
+     } // while
+     return;
+   }
+    
+    // What happens when you die? Here is the answer!
+    method void death() {
+        let lives = lives -1;
+        do snake.setAlive(true);
+        if(score > highScore){
+            let highScore = score;
+            let score = 0;
+        }
+        
+        // if more lives then just reset the map. Else game over.
+        if(lives > 0){
+            do snake.initSnake(300,126);
+            do Screen.clearScreen(); 
+            do drawBorder();// let things stay at the same place
+            //do snake.erase();
+            let direction =0;
+            do snake.draw();
+            do apple();
+        }
+        else{
+           do snake.erase();
+           do snake.initSnake(300,126);
+           do gameOver(); // creates game over screen
+        }
+        return;
+    }
+    
+    // game over screen with high score and the ability to exit with q
+    method void gameOver(){
+         var char key;
+         do Screen.clearScreen();
+         do Output.moveCursor(11,22);
+         do Output.printString("Game Over");
+        do Output.moveCursor(13,22);
+         do Output.printString("High Score: ");
+         do Output.printInt(highScore);
+         //do snake.dispose();
+         while(~exit){
+            // i would like to exit run();
+             let key = Keyboard.keyPressed();
+             if (key = 81){
+                let exit = true;
+               
+             }
+         }
+        return;
+    }
+    
+    // generate the first apple
+   method void apple(){
+       let xApple = 150;
+       let yApple = 150;
+       do Screen.setColor(true);
+       do Screen.drawCircle(150,150,5);
+       return; 
+   }
+    
+    // checks if the snake is near the apple. Since hitting 1 pixle was quite hard.
+    method int dist( int xSnake, int ySnake){
+        var int distance;
+        var int xDist;
+        var int yDist;
+        var int bothDist;
+        let xDist = Math.multiply( (xApple -xSnake)  , (xApple-xSnake) );
+        let yDist =  Math.multiply( (yApple-ySnake) ,(yApple-ySnake) );
+        let bothDist = xDist + yDist; // have do check so the number dont loop around and get negative
+        if( bothDist > 0 ){
+            return Math.sqrt(bothDist);
+        }
+        return 999;
+    }
+    
+    // apple creating and points from apples.
+    method void pointsApple (){
+      var int distance;
+      var int snakeLength;
+       
+      let distance = dist(snake.getXcord(), snake.getYcord()); 
+     let appleCounter = appleCounter +1; 
+      do Screen.setColor(false);
+      do Screen.drawCircle(xApple,yApple,5);
+      let score = score + 10; // apple gives 10 points
+      do Output.moveCursor(3,7);  
+      do Output.printInt(score);
+
+      // should have stop if we reach max.
+      let snakeLength = snake.getLength() + 100;
+      if ( snakeLength < snake.getMaxLength()){
+
+        do snake.setLength(snakeLength);
+
+      }
+
+      if (appleCounter = 1){
+        let xApple = 120;
+        let yApple = 50;
+      }
+      if (appleCounter = 2){
+        let xApple = 150;
+        let yApple = 200;
+      }
+      if (appleCounter = 3){
+        let xApple = 300;
+        let yApple = 150;
+      }
+      if (appleCounter = 4){
+        let xApple = 250;
+        let yApple = 50;
+
+      }
+       if (appleCounter = 5){
+        let xApple = 400;
+        let yApple = 200;  
+      }
+       if (appleCounter = 6){
+        let xApple = 200;
+        let yApple = 70;  
+      }
+       if (appleCounter = 7){
+        let xApple = 450;
+        let yApple = 120;
+        let appleCounter = 0;  
+      }
+
+      do Screen.setColor(true);
+      do Screen.drawCircle(xApple,yApple,5);
+        
+        return;
+    }
+    
+}
+ 
+
+

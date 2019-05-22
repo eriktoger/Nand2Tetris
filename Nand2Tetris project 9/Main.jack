@@ -1,0 +1,28 @@
+// I started with the Square dance game
+// So some parts are identical.If you dont understand my code maybe its best to start looking at Square
+// 
+// It is not the best game, but it works!
+
+/*
+improvments. (from easy to hard)
+- give snake a face/head (easy)
+- random apples (medium)
+- implement pair, instead of one index to x and one to y (medium)
+- better update, so we can have longer/faster snake (hard)
+- my first idea was to use pointers instead of moving everthing one step
+    but that ran in the problem how to know if snake colliede with it self.
+    I wanted to see if next pixel was black ( then I know the snake hit something)
+    But i was quite hard to figure out where the screen pixel is in memory.
+    
+*/
+
+/** Initializes a new snake game and starts running it. */
+class Main {
+    function void main() {
+        var SnakeGame game;
+        let game = SnakeGame.new();
+        do game.run();
+        do game.dispose();
+        return;
+    }
+}
